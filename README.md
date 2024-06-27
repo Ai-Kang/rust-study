@@ -188,8 +188,7 @@ fn main() {
     }
 }
 ```
-# ownership
-## 数据拷贝与移动
+# ownership(所有权)
 ```rust
 fn main() {
     let arr = [1, 2, 3];
@@ -211,45 +210,177 @@ fn main() {
     // 此时会报错，因为str1不存在了
     println!("str1: {}", str1);
 }
+```
+## 数据拷贝与移动
+### copy
+```rust
+fn main(){
+    let c1 = 1;
+    // 此时执行了拷贝
+    let c2 = c1;
+}
+```
+### move
+```rust
+fn main(){
+    let s1 = String::from("hello");
+    // 此处执行了所有权转移
+    let s2 = s1;
+    // 在此处开始s1已经不存在了
+    // 此处在执行了深拷贝，s2依然存在
+    let s3 = s2.clone();
+}
+// =========================================================
+fn main() {
+    let s1: String = String::from("str1");
+    // 此处也进行了所有权的转移，在函数执行结束后s1也被销毁了
+    get_len(s1);
+    // println!("{}",s1)
+}
 
+fn get_len(s: String) ->usize {
+    return s.len();
+}
+```
+## String和&str
+```text
+String是一个堆分配的可变字符串类型
+pub struct String {
+    vec: Vec<u8>,
+}
+
+&str是指字符串切片引用，是在栈上分配的
+    不可变引用，指向存储在其他地方的UTF-8编码的字符串数据
+    由指针和长度构成
+    
+String是具有所有权的，而&str并没有所有权
+Struct中属性使用String
+    如果不适用显示声明生命周期无法使用&str
+    不只是麻烦，还有很多隐患
+函数参数推荐使用&str（如果不想交出所有权）
+    &str为参数，可以传递&str和String
+    &String为参数，只能传&String，不能传&str
+```
+### &str转String
+```text
+fn main() {
+    let s1: String = String::from("str1");
+    let s2 = "你好".to_owned();
+    let s3 = "你好".to_string();
+}
+```
+# 枚举
+```text
+枚举(enums) 是用户自定义的数据类型，用于表示具有一组离散可能值的变量
+    每种可能值都称为“variant”（变体）
+    枚举名::变体名
+枚举的好处
+    可以使代码更加严谨、更易读
+    More robust programs
+```
+```rust
+// 创建枚举
+enum Shpe {
+    Circle(f64,f32),
+    Rectangle(f64),
+    Square(f32),
+}
+```
+## 常用枚举
+```rust
+pub enum Option<T> {
+    None,
+    Some(T),
+}
+pub enum Result<T,E> {
+    Ok(T),
+    Err(E),
+}
 ```
 
-
-### 	3:字符串切片(&str)
-
-````rust
-let mut s1 = String::from("abcd aikang");
-let str1:&str = &s1[0..3];
-println!("{str1}");
-````
-
-
-
-
-
-## 2:变量与常量
+# 匹配模式 match
+```text
+1: match关键字实现
+2：必须覆盖所有的变体
+3：可以用_、..=、三元(if)等来进行匹配
+```
 
 ```rust
-// 声明变量使用let关键字，默认情况下变量是不可变的(lmmutable)，如果需要变量可变则在变量声明是加mut修饰
+fn main() {
+    let  number = 0;
+    match number {
+        0=> println!("Zero"),
+        1|2 => println!("One or Two"),
+        3..=9 => println!("From Three to Nine"),
+        n if n % 2 == 0 => println!("Even number"),
+        _=> println!("Other")
+    }
+}
+// =========================================================
+enum Color {
+    Red,
+    Blue,
+    Null,
+}
 
-// let 变量名:变量类型 = 变量值;
-let a:u32 = 10;
-let mut b:u32 = 20;
+impl Color {
+    fn print_color(&self) {
+        match self {
+            Color::Red => { println!("my_red") }
+            Color::Blue => { print!("my_blue"); }
+            Color::Null => { print!("is null"); }
+        }
+    }
+}
 
-// 常量：使用const关键字，不可以使用mut关键字，不可改变
-// const 常量名:类型 = 常量值;
-const C_NUMBER:u32 = 30;
+fn main() {
+    let a: Color = Color::Red;
+    a.print_color()
+}
+
 ```
 
-## 3:隐藏(Shadowing)
+
+
+
+
+
+## 6:struct
 
 ```rust
-// 隐藏是会复用之前的变量名并且会顶替之前的同名变量
-let a:u32 = 10;
-let a:String = String::new();
+fn main() {
+    // 初始化结构体
+    let mut p1 = Person {
+        name: String::from("ak"),
+        age: 20,
+        sex: false,
+    };
+    // 访问结构体
+    println!("username: {},age: {},sex: {}",p1.name,p1.age,p1.sex);
+}
+
+/*
+ 定义结构体
+*/
+struct Person {
+    name: String,
+    age: u32,
+    sex: bool,
+}
 ```
 
-
+```rust
+/*
+ 定义结构体
+ #[derive(Debug)] 默认打印    {:?} or {:#?}
+*/
+#[derive(Debug)]
+struct Person {
+    name: String,
+    age: u32,
+    sex: bool,
+}
+```
 
 ## 3:控制语句
 
@@ -483,8 +614,8 @@ Heap----
 借用的数据不允许修改，可以加mut来表示可变，&mut String，传参也加mut
 fn main() {
     let mut s1 = String::from("abcd");
-    // getLen(s1);
-    // getLen(&s1);
+    // get_len(s1);
+    // get_len(&s1);
     let len: usize = get_len(&mut s1);
     println!("{len}");
 }
@@ -558,42 +689,6 @@ fn main() {
 }
 ```
 
-## 6:struct
-
-```rust
-fn main() {
-    // 初始化结构体
-    let mut p1 = Person {
-        name: String::from("ak"),
-        age: 20,
-        sex: false,
-    };
-    // 访问结构体
-    println!("username: {},age: {},sex: {}",p1.name,p1.age,p1.sex);
-}
-
-/*
- 定义结构体
-*/
-struct Person {
-    name: String,
-    age: u32,
-    sex: bool,
-}
-```
-
-```rust
-/*
- 定义结构体
- #[derive(Debug)] 默认打印    {:?} or {:#?}
-*/
-#[derive(Debug)]
-struct Person {
-    name: String,
-    age: u32,
-    sex: bool,
-}
-```
 
 ### 	1:函数实现
 
@@ -658,28 +753,7 @@ fn main() {
 }
 ```
 
-## 7:枚举
 
-```rust
-不可变的类型可以定义枚举
-可以使用impl来定义方法
-/*
- 创建枚举值
-*/
-enum ApAddrKind {
-    V4(u8, u8, u8, u8),
-    V6(String),
-}
-
-fn main() {
-    // 使用枚举
-    let four: ApAddrKind = ApAddrKind::V4(127, 0, 0, 1);
-    route(four);
-}
-
-// 方法中使用枚举
-fn route(ip_kind: ApAddrKind) {}
-```
 
 ## 8:系统模块
 
