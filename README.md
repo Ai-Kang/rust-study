@@ -339,58 +339,157 @@ fn main() {
 }
 
 ```
-
-
-
-
-
-
-## 6:struct
-
+# 结构体
+## 结构体定义和属性
+```text
+结构体是一种用户定义的数据类型，用于创建自定义的数据结构
+定义：
+    struct Point{
+        x: i32,
+        y: i32,
+    }
+每条数据的(x和y)称为属性、字段(field)
+通过点(对象.xx)来访问结构体中的属性
+```
+## 结构体的方法
+```text
+结构体的方法是指，通过实例调用(&self、&mut self、self)
+impl Point{
+    fn 方法名(&self,other: &Point) -> f64 {
+        // 方法体
+        return 返回值;
+    }
+}
+```
+## 结构体关联函数
+```text
+关联函数是与类型相关联的函数，调用时为结构体名称::函数名()
+impl Point {
+    fn new(x: u32,y: u32) -> Self {
+        return Point {x,y}
+    }
+}
+```
+## 关联变量
+```text
+关联变量是指，和结构体类型相关联的变量，也可以在特质或是枚举中
+impl Point {
+    const PI: f64 = 3.14159
+}
+调用：Point::PI
+```
+## 使用结构体
 ```rust
+enum Flavor {
+    Spicy,
+    Sweet,
+    Fruity,
+}
+
+struct Drink {
+    flavor: Flavor,
+    price: f64,
+}
+
+impl Drink {
+    // 关联变量
+    const MAX_PRICE: f64 = 20.0;
+    // 方法，不可变参数
+    fn print_drink(&self) {
+        match self.flavor {
+            Flavor::Sweet => println!("Sweet" ),
+            _=>println!("null")
+        }
+    }
+    // 关联函数
+    fn new(price: f64) -> Self {
+        return Drink {
+            flavor: Flavor::Fruity,
+            // price: price,
+            price,
+        }
+    }
+}
+
 fn main() {
-    // 初始化结构体
-    let mut p1 = Person {
-        name: String::from("ak"),
-        age: 20,
-        sex: false,
+    let sweet = Drink {
+        flavor: Flavor::Sweet,
+        price: 8.8,
     };
-    // 访问结构体
-    println!("username: {},age: {},sex: {}",p1.name,p1.age,p1.sex);
+    // 调用函数
+    sweet.print_drink();
+    // 调用关联函数
+    let fruity = Drink::new(12.0);
+    fruity.print_drink();
 }
 
-/*
- 定义结构体
-*/
-struct Person {
-    name: String,
-    age: u32,
-    sex: bool,
-}
+```
+## Ownership与结构体
+```text
+1: 所有值在rust中都应该有一个owner
+2：在同一时刻只能有一个所有者
+3：值在超出作用域时会自动销毁
+每当将值从一个位置传递到另外一个位置时，borrow checker都会重新评估所有权
+    1：immutable Borrow 使用不可变的借用，值的所有仍归发送方所有，接收方直接接收对该值的引用，而不是该值的副本。但是，他们不能使用该引用来修改它指向的值，编译器不允许这样做。释放资源的责任仍由发送方承担。仅当发送者本身超出范围时，才会删除值
+    2：mutable Borrow 使用可变的借用所有权，删除值的责任也有发送者承担。但是接收方能够通过他们接收的引用来修改值。
+    3：Move 这是所有权转移，所有权从一个地点转移到另外一个地点。borrow checker关于释放该值的决定将由该值的接收方通知。由于所有权已经送发送方转移到接收方，因此发送方在将引用移动到另一个上下文后不能再使用该引用，发送方再移动后对value的任何使用都会导致错误
+    
+结构体的关联函数的参数：
+    &self: (self: &Self) // 不可变引用
+    &mut self: (self: &mut Self) // 可变引用
+    self：(self: Self) // Move
+```
+## 堆和栈 copy和move
+```text
+stack:
+    1: 栈将按照获取值的顺序徐存储值，并以相反的顺序删除值
+    2：操作高效，函数作用域就是再栈上
+    3：栈上存储的所有数据都必须具有已知固定大小数据
+stack上的数据类型：
+    1：基础数据类型
+    2：tuple和array
+    3：struct与枚举等也是存储在栈上，如果属性有String等在堆上的数据类型会有指向堆的情况
+heap：
+    1：堆的规律性比较差，当把一些东西放到请求的堆上时，请求空间并返回一个指针，这是该位置的地址
+    2：长度不确定
+heap上的数据类型：
+    Box、Rc、String、Vec等
+一般来说在栈上的数据类型都是默认copy但是struct等默认为move，需要copy只需要设置数据类型实现Copy特质即可，或是调用Clone函数（需要实现Clone特质）
+```
+## Box指针
+```text
+Box是一个智能指针，它提供对堆分配内存的所有权。它允许你将数据存储到堆上而不是栈上，并且在复制或移动时保持堆数据的唯一拥有权。
+    使用Box可以避免一些内存管理的问题，如悬垂指针和重复释放
+    1：所有权转移
+    2：释放内存
+    3：解引用
+    4：构建递归数据结构
 ```
 
+## copy与clone
+```text
+Move：所有权转移
+Clone：深拷贝
+Copy：Copy是在Clone的基础建立的marker trait(Rust中最类似继承的关系)
+1：trait：（特质）是一种定义共享行为的机制。Clone也是特质
+2：marker trait 是一个没有任何方法的 trait，它主要用于向编译器传递某些信息，以改变类型的默认行为
+```
+## Box
 ```rust
-/*
- 定义结构体
- #[derive(Debug)] 默认打印    {:?} or {:#?}
-*/
-#[derive(Debug)]
-struct Person {
-    name: String,
-    age: u32,
-    sex: bool,
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+fn main() {
+    // 使用box把数据放到堆上
+    let p1 = Box::new(Point { x: 10.0, y: 20.0 });
+    print!("x:{} y:{}", p1.x, p1.y);
 }
 ```
-
-## 3:控制语句
-
-### 		1:if
-
+# 流程控制
+## if语句
 ```rust
-// if表达式允许根据条件执行不同分支，条件类型时bool类型
-// if表达式中与条件相关的代码叫做分支(arm)
-// if后边可选加上else表达式
-
 fn main() {
     let a = 10;
     if a == 10 {
@@ -401,9 +500,16 @@ fn main() {
         println!("等于其他");
     }
 }
-// if是一个表达式，可以放在let右边作为赋值
-let b = if a == 10 { a } else { 20 };
 ```
+## switch
+
+
+# 函数
+
+
+
+
+
 
 ### 	2:if let
 

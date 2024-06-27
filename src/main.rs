@@ -1,20 +1,11 @@
-enum Color {
-    Red,
-    Blue,
-    Null,
+struct Point {
+    x: f64,
+    y: f64,
 }
 
-impl Color {
-    fn print_color(&self) {
-        match self {
-            Color::Red => { println!("my_red") }
-            Color::Blue => { print!("my_blue"); }
-            Color::Null => { print!("is null"); }
-        }
-    }
-}
 
 fn main() {
-    let a: Color = Color::Red;
-    a.print_color()
+    // 使用box把数据放到堆上
+    let p1 = Box::new(Point { x: 10.0, y: 20.0 });
+    print!("x:{} y:{}", p1.x, p1.y);
 }
