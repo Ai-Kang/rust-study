@@ -1,11 +1,22 @@
-struct Point {
-    x: f64,
-    y: f64,
+fn main() {
+    let str1 = String::from("aa bb");
+    let len_str = first_world(&str1);
+    println!("{len_str}");
+    // 字符串切片
+    let a = &str1[0..2];
+    let b = &str1[3..5];
+    println!("{str1}");
+    println!("{a}");
+    println!("{b}");
 }
 
-
-fn main() {
-    // 使用box把数据放到堆上
-    let p1 = Box::new(Point { x: 10.0, y: 20.0 });
-    print!("x:{} y:{}", p1.x, p1.y);
+fn first_world(s: &str) -> &str {
+    // 字符串转数组
+    let str_arr: &[u8] = s.as_bytes();
+    for (i, &item) in str_arr.iter().enumerate() {
+        if item == b' ' {
+            return &s[..i];
+        }
+    }
+    return &s[..];
 }

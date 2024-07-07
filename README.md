@@ -378,52 +378,7 @@ impl Point {
 }
 调用：Point::PI
 ```
-## 使用结构体
-```rust
-enum Flavor {
-    Spicy,
-    Sweet,
-    Fruity,
-}
 
-struct Drink {
-    flavor: Flavor,
-    price: f64,
-}
-
-impl Drink {
-    // 关联变量
-    const MAX_PRICE: f64 = 20.0;
-    // 方法，不可变参数
-    fn print_drink(&self) {
-        match self.flavor {
-            Flavor::Sweet => println!("Sweet" ),
-            _=>println!("null")
-        }
-    }
-    // 关联函数
-    fn new(price: f64) -> Self {
-        return Drink {
-            flavor: Flavor::Fruity,
-            // price: price,
-            price,
-        }
-    }
-}
-
-fn main() {
-    let sweet = Drink {
-        flavor: Flavor::Sweet,
-        price: 8.8,
-    };
-    // 调用函数
-    sweet.print_drink();
-    // 调用关联函数
-    let fruity = Drink::new(12.0);
-    fruity.print_drink();
-}
-
-```
 ## Ownership与结构体
 ```text
 1: 所有值在rust中都应该有一个owner
@@ -501,102 +456,224 @@ fn main() {
     }
 }
 ```
-## switch
-
-
-# 函数
-
-
-
-
-
-
-### 	2:if let
-
+## match
 ```rust
-处理只关心一种匹配而忽略其它匹配的情况
 fn main() {
-    if let 1 = 1{
-        println!("hhhh");
-    } else {
-        println!("aaaaa");
+    let number = 1;
+    match number {
+        1 => println!("1"),
+        2 => println!("2"),
+        3 => println!("3"),
+        4 => println!("4"),
+        _ => println!("number")
     }
 }
-
 ```
 
-### 	3:loop(无限循环)
-
-```rust
-// 循环语句 ，使用continue跳过本次循环，使用break结束循环 
-loop{
-   println!("猜一个数字！");
-   // 定义变量 可变的 变量名 = 类型::方法,rust中默认是不可变的immutable
-   let mut guess = String::new();
-   // io库中的stdin输入方法   read_line(放入哪个变量) 读取一行  expect(错误信息)
-  io::stdin().read_line(&mut guess).expect("无法读取");
-  // 输入转换为数字，其实是使用了shadow隐藏了之前的变量，后把变量类型转换了
-  let guess: u32 = match guess.trim().parse() {
-                   Ok(num) => num,
-                   // 如果转换错误则重新输入
-                  Err(_) => continue
-                 };
-  //  match：使用返回值来决定执行的语句
-  match guess.cmp(&secret_number) {
-        Ordering::Greater => println!("太大了"),
-        Ordering::Less => println!("太小了"),
-        Ordering::Equal => {
-          println!("回答正确");
-          break;
-        }
-  };
-}
-```
-
-### 	4:while(条件循环)
-
+## loop 无限循环
 ```rust
 fn main() {
-    let mut number = 3;
-    while number != 0 {
-        println!("{number}");
-        number -= 1;
+    let mut counter: i32 = 0;
+    loop {
+        counter += 1;
+        // 跳出循环
+        if counter == 10 {
+            break;
+        };
+        println!("{counter}")
     }
 }
-
 ```
-
-### 	5:for(条件循环)
-
+## while 条件循环
 ```rust
 fn main() {
-    let a: [i32; 6] = [10,20,30,40,50,60];
+    let mut counter: i32 = 0;
+    while counter <= 10 {
+        counter += 1;
+        // 跳过循环
+        if counter == 5 {
+            continue;
+        };
+        // 跳出循环
+        if counter == 10 {
+            break;
+        };
+        println!("{counter}")
+    }
+}
+```
+## for 条件循环
+```rust
+fn main() {
+    let a: [i32; 5] = [10, 20, 30, 40, 50];
+    for i in a {
+        println!("{i}")
+    }
+
     for i in a.iter() {
-        println!("{i}");
+        println!("{i}")
+    }
+
+    // 完成倒计时
+    for i in (1..4).rev() {
+        println!("{i}")
+    };
+}
+```
+
+# 所有权
+```text
+所有权是rust最独特的特性，让rust无需GC就可以保证内存安全。
+Rust的核心特性就是所有权
+所有程序在运行时都必须管理它们，使用计算机内存的方式
+    1：有些语言有垃圾收集机制，在程序运行时，他们会不断的寻找不在使用的内存进行释放
+    2：有些语言没有自动垃圾回收机制，需要程序员显式的分配和释放内存
+    3：rust通过所有权机制来管理内存，其中包含一组编译器在编译时的检查的规则
+```
+```text
+Stack(栈)：按照接受值的顺序来存储，按照相反顺序来出栈，先进后出。
+    存储在栈上的数据必须拥有已知大小。
+heap(堆)：内存组织性相比于栈稍差一些，当把数据放入堆内存时会请求一定量的空间。
+    操作系统在heap里找一块足够大小的空间，把它标记为在用，并且返回一个指针，指针指向内存头地址。
+    这个过程叫做堆内存分配，也叫”分配“
+```
+```text
+所有权规则：
+    每个值都有一个变量，这个变量是该值的所有者
+    每个值同时只能有一个所有者
+    当所有者超出作用域时，该值会被删除
+```
+## String类型
+```text
+String比基础标量类型更复杂
+字符串字面值：程序里手写的哪些字符串值，他们是不可变的
+rust还有第二种字符串类型：String
+    在heap上分配，能够存储在编译时位置大小的文本
+```
+```rust
+fn main() {
+    // 创建String
+    let mut s1: String = String::from("Hello");
+    // 追加值
+    s1.push_str(",World");
+    print!("{s1}");
+}
+```
+# 函数
+```rust
+fn main() {
+   // 定义字符串类型
+    let s1 = String::from("Test move");
+    // 这里执行了move操作，所有这行代码后s1变得不在可用
+    take_ownership(s1);
+    // 定义基础变量类型
+    let a1: i32 = 10;
+    // 基础类型实现了copy，所以这行代码后a1变量继续可用
+    makes_copy(a1);
+
+}
+
+fn take_ownership(str1: String){
+    println!("{str1}")
+}
+
+fn makes_copy(a1: i32){
+    print!("{a1}");
+}
+```
+```rust
+fn main() {
+    // 定义字符串类型
+    let mut  s1 = String::from("Test move");
+    // 这里发生了引用、借用，s1不会丢失对值的所有权
+    let slen: usize = take_ownership(&mut s1);
+    println!("{s1}的长度{slen}")
+}
+
+/**
+  *&符号代表接收一个引用，也叫借用，调用者不会丢失堆传入参数的所有权,
+  * 借用时默认不允许修改数据
+  * 增加mut关键字时变为可变 (str1: &mut String)
+  */
+fn take_ownership(str1: &mut String) -> usize {
+    str1.push_str("haha");
+    return str1.len();
+}
+```
+## 字符串切片 &str
+```rust
+fn main() {
+    let str1 = String::from("aa bb");
+    let len_str = first_world(&str1);
+    println!("{len_str}");
+    // 字符串切片
+    let a = &str1[0..2];
+    let b = &str1[3..5];
+    println!("{str1}");
+    println!("{a}");
+    println!("{b}");
+}
+
+fn first_world(s: &str) -> &str {
+    // 字符串转数组
+    let str_arr: &[u8] = s.as_bytes();
+    for (i, &item) in str_arr.iter().enumerate() {
+        if item == b' ' {
+            return &s[..i];
+        }
+    }
+    return &s[..];
+}
+```
+## 使用结构体
+```rust
+enum Flavor {
+    Spicy,
+    Sweet,
+    Fruity,
+}
+
+struct Drink {
+    flavor: Flavor,
+    price: f64,
+}
+
+impl Drink {
+    // 关联变量
+    const MAX_PRICE: f64 = 20.0;
+    // 方法，不可变参数
+    fn print_drink(&self) {
+        match self.flavor {
+            Flavor::Sweet => println!("Sweet" ),
+            _=>println!("null")
+        }
+    }
+    // 关联函数
+    fn new(price: f64) -> Self {
+        return Drink {
+            flavor: Flavor::Fruity,
+            // price: price,
+            price,
+        }
     }
 }
 
 fn main() {
-    let a: [i32; 6] = [10,20,30,40,50,60];
-    for (i,v) in a.iter().enumerate() {
-        println!("{v}");
-    }
+    let sweet = Drink {
+        flavor: Flavor::Sweet,
+        price: 8.8,
+    };
+    // 调用函数
+    sweet.print_drink();
+    // 调用关联函数
+    let fruity = Drink::new(12.0);
+    fruity.print_drink();
 }
 ```
 
-### 	6:match（控制流运算符）
 
-````rust
-允许一个值与一个系列模式进行匹配，并执行匹配的模式对应的代码
-模式可以是字面值、变量名、通配符.....
-match 变量 {
-    对比值1 => 返回结果1,
-    对比值2 => {
-        返回结果2
-    },
-    _ =>{默认处理};
-}
-````
+
+
 
 ### 	7:unwrap
 
