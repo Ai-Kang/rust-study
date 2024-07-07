@@ -625,6 +625,21 @@ fn first_world(s: &str) -> &str {
     return &s[..];
 }
 ```
+# 结构体
+## 定义struct
+```rust
+struct User {
+    name: String,
+    age: u32,
+    active: bool,
+}
+```
+## 实例化struct
+```rust
+
+```
+
+
 ## 使用结构体
 ```rust
 enum Flavor {
@@ -633,10 +648,7 @@ enum Flavor {
     Fruity,
 }
 
-struct Drink {
-    flavor: Flavor,
-    price: f64,
-}
+
 
 impl Drink {
     // 关联变量
