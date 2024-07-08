@@ -783,7 +783,22 @@ fn main() {
 }
 ```
 ## String
-
+```rust
+fn main() {
+    // 创建String
+    let mut s1 = String::new();
+    s1.push('a');
+    s1.push('b');
+    s1.push('c');
+    s1.push_str("hello");
+    let mut s2 = "abc".to_string();
+    let mut s3 = String::from("abc");
+    let mut s4 = String::from("😊");
+    // 字符串拼接
+    let s5 = s1 + &s2;
+    let s6 = format!("{}-{}-{}", s1, s2, s3);
+}
+```
 ## HashMap
 
 
